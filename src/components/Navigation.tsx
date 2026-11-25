@@ -101,7 +101,6 @@ export default function Navigation() {
             width={2172}
             height={724}
             sizes="(max-width: 700px) 90vw, 45vw"
-            priority
           />
         </div>
         <div className={`${styles.branchFrame} ${styles.branchFrameRight}`}>

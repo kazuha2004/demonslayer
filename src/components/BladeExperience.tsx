@@ -433,7 +433,7 @@ export default function BladeExperience() {
                   aria-hidden={index !== activeIndex}
                   style={{ filter: option.filter }}
                 >
-                  <Image src={option.image} alt={index === activeIndex ? `${option.label} Nichirin sword` : ""} fill sizes="(max-width: 767px) 92vw, 48vw" priority={index === 0} />
+                  <Image src={option.image} alt={index === activeIndex ? `${option.label} Nichirin sword` : ""} fill sizes="(max-width: 767px) 92vw, 48vw" />
                   <span className={styles.bladeGlow} style={{ backgroundColor: option.accentColor }} aria-hidden="true" />
                 </div>
               ))}

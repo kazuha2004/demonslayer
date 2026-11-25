@@ -5,7 +5,7 @@ import gsap from "gsap";
 import Checker from "@/components/Checker";
 import SlashWipe from "@/components/SlashWipe";
 
-const KEY_IMAGES = ["/backgrounds/hero-bg.png", "/characters/tanjiro.png", "/ui/title-logo.png"];
+const KEY_IMAGES = ["/backgrounds/hero-bg.png", "/ui/hero-tanjiro.png", "/ui/title-logo.png"];
 
 export default function LoadingScreen() {
   const [progress, setProgress] = useState(0);

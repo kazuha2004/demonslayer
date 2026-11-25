@@ -540,6 +540,8 @@ export default function EntityShowcase({ entities, theme }: {
                   <img
                     src={item.image}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     style={demonTheme ? {
                       objectPosition: `${item.faceX}% ${item.faceY}%`,
                       transform: `scale(${item.zoom})`,
