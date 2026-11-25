@@ -2148,6 +2148,10 @@ a:focus-visible {
   will-change: opacity, transform;
 }
 
+.section-backdrop-image[data-section-background="hero"] {
+  transform: scale(1) !important;
+}
+
 .section-backdrop-image[data-section-background="footer"] {
   top: 7.5% !important;
   bottom: auto !important;
@@ -4289,7 +4293,7 @@ a:focus-visible {
     --hero-m-vertical-opacity: 0.7;
     height: 100svh;
     min-height: 100svh;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .hero-shade {

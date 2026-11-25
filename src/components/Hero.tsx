@@ -1,14 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HankoSeal from "@/components/HankoSeal";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ParticleLayer = lazy(() => import("@/components/HeroParticles"));
+function EmptyParticleLayer() {
+  return null;
+}
+
+const loadParticleLayer = (): Promise<{ default: ComponentType }> =>
+  import("@/components/HeroParticles").catch((error: unknown) => {
+    console.warn("Hero particle layer failed to load; continuing without it.", error);
+    return { default: EmptyParticleLayer };
+  });
+
+const ParticleLayer = lazy(loadParticleLayer);
 
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
