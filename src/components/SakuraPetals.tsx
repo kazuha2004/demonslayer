@@ -49,6 +49,10 @@ export default function SakuraPetals() {
     let wind = 0;
     let targetWind = 0;
     let isVisible = document.visibilityState === "visible";
+    let mobile = window.matchMedia("(max-width: 700px)").matches;
+    let narrowViewport = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    ).matches;
     let petals: Petal[] = [];
     const footer = document.querySelector("footer");
     const isFooterVisible = () => {
@@ -72,7 +76,10 @@ export default function SakuraPetals() {
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-      const mobile = window.matchMedia("(max-width: 700px)").matches;
+      mobile = window.matchMedia("(max-width: 700px)").matches;
+      narrowViewport = window.matchMedia(
+        "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+      ).matches;
       const count = mobile ? 12 : Math.min(42, Math.max(22, Math.round(width / 34)));
       petals = Array.from({ length: count }, () => createPetal(width, height, true));
     };
@@ -121,7 +128,8 @@ export default function SakuraPetals() {
       targetWind *= 0.96;
       context.clearRect(0, 0, width, height);
 
-      for (let index = 0; index < petals.length; index += 1) {
+      const activePetalCount = footerVisible && narrowViewport ? Math.min(8, petals.length) : petals.length;
+      for (let index = 0; index < activePetalCount; index += 1) {
         const petal = petals[index];
         const footerPetalLimit = height * 0.72;
         if (footerVisible && petal.y >= footerPetalLimit - 20) {

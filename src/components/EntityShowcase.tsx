@@ -98,21 +98,41 @@ function DemonDecorations({ mobile, visible }: { mobile: boolean; visible: boole
   return (
     <div className={styles.demonDecorations} data-active={visible ? "true" : "false"} aria-hidden="true">
       <div className={styles.demonScrim} />
-      <div className={styles.demonGrid} />
-      <div className={`${styles.demonCloud} ${styles.demonCloudLeft}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
-      <div className={`${styles.demonCloud} ${styles.demonCloudRight}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
-      <div className={styles.demonCheckerLeft} />
-      <div className={styles.demonCheckerRight} />
-      <div className={styles.demonLilies}>
-        {Array.from({ length: petals }, (_, index) => (
-          <i key={index} style={{
-            left: `${(index * 7.13 + 3) % 100}%`,
-            animationDelay: `${-(index * 2.71) % 20}s`,
-            animationDuration: `${18 + (index % 5) * 2.1}s`,
-            "--lily-rotation": `${(index % 2 ? 1 : -1) * (18 + index * 7)}deg`,
-          } as CSSProperties} />
-        ))}
-      </div>
+      {!mobile && <div className={styles.demonGrid} />}
+      {mobile ? (
+        <>
+          <div className={`${styles.demonCloud} ${styles.demonCloudRight}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="20vw" /></div>
+          <div className={styles.demonLilies}>
+            {Array.from({ length: petals }, (_, index) => (
+              <i key={index} style={{
+                left: `${(index * 7.13 + 3) % 100}%`,
+                animationDelay: `${-(index * 2.71) % 20}s`,
+                animationDuration: `${18 + (index % 5) * 2.1}s`,
+                "--lily-rotation": `${(index % 2 ? 1 : -1) * (18 + index * 7)}deg`,
+              } as CSSProperties} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={`${styles.demonCloud} ${styles.demonCloudLeft}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
+          <div className={`${styles.demonCloud} ${styles.demonCloudRight}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
+        </>
+      )}
+      {!mobile && <>
+        <div className={styles.demonCheckerLeft} />
+        <div className={styles.demonCheckerRight} />
+        <div className={styles.demonLilies}>
+          {Array.from({ length: petals }, (_, index) => (
+            <i key={index} style={{
+              left: `${(index * 7.13 + 3) % 100}%`,
+              animationDelay: `${-(index * 2.71) % 20}s`,
+              animationDuration: `${18 + (index % 5) * 2.1}s`,
+              "--lily-rotation": `${(index % 2 ? 1 : -1) * (18 + index * 7)}deg`,
+            } as CSSProperties} />
+          ))}
+        </div>
+      </>}
     </div>
   );
 }
@@ -340,30 +360,44 @@ export default function EntityShowcase({ entities, theme }: {
     const section = sceneRef.current;
     const stage = stageRef.current;
     if (!section || !stage) return;
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      pin: stage,
-      pinType: demonTheme ? "transform" : undefined,
-      start: "top top",
-      end: "bottom bottom",
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const index = Math.min(displayEntities.length - 1, Math.floor(self.progress * displayEntities.length));
-        if (index === scrollIndexRef.current) return;
-        scrollIndexRef.current = index;
-        if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
-        scrollStepTimerRef.current = setTimeout(() => {
-          scrollStepTimerRef.current = null;
-          navigateTo(index, false, "scroll");
-        }, 80);
-      },
-    });
-    triggerRef.current = trigger;
+    const mobileQuery = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    );
+    let trigger: ScrollTrigger | null = null;
+    const updatePinning = () => {
+      trigger?.kill(true);
+      trigger = null;
+      triggerRef.current = null;
+      if (mobileQuery.matches) return;
+
+      trigger = ScrollTrigger.create({
+        trigger: section,
+        pin: stage,
+        pinType: demonTheme ? "transform" : undefined,
+        start: "top top",
+        end: "bottom bottom",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const index = Math.min(displayEntities.length - 1, Math.floor(self.progress * displayEntities.length));
+          if (index === scrollIndexRef.current) return;
+          scrollIndexRef.current = index;
+          if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
+          scrollStepTimerRef.current = setTimeout(() => {
+            scrollStepTimerRef.current = null;
+            navigateTo(index, false, "scroll");
+          }, 80);
+        },
+      });
+      triggerRef.current = trigger;
+    };
+    updatePinning();
+    mobileQuery.addEventListener("change", updatePinning);
     return () => {
+      mobileQuery.removeEventListener("change", updatePinning);
       if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
       scrollStepTimerRef.current = null;
       if (triggerRef.current === trigger) triggerRef.current = null;
-      trigger.kill(true);
+      trigger?.kill(true);
     };
   }, [displayEntities.length, navigateTo]);
 
@@ -375,7 +409,9 @@ export default function EntityShowcase({ entities, theme }: {
       stage.classList.toggle("is-visible", entry.isIntersecting);
     }, { threshold: 0.01 });
     observer.observe(stage);
-    const mobileQuery = window.matchMedia("(max-width: 700px)");
+    const mobileQuery = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    );
     const updateMobile = () => setMobile(mobileQuery.matches);
     updateMobile();
     mobileQuery.addEventListener("change", updateMobile);
@@ -411,7 +447,7 @@ export default function EntityShowcase({ entities, theme }: {
     if (!touchStart.current) return;
     const dx = event.changedTouches[0].clientX - touchStart.current.x;
     const dy = event.changedTouches[0].clientY - touchStart.current.y;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) navigateBy(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > (mobile ? 40 : 48) && Math.abs(dx) > Math.abs(dy)) navigateBy(dx < 0 ? 1 : -1);
     touchStart.current = null;
   };
   const source = originalEntity;
@@ -476,12 +512,12 @@ export default function EntityShowcase({ entities, theme }: {
                     aria-hidden="true"
                   />
                   <img
-                    className={`${styles.demonFallback}${depthFailed ? ` ${styles.isFallback}` : ""}`}
+                    className={`${styles.demonFallback}${depthFailed || mobile ? ` ${styles.isFallback}` : ""}`}
                     src={entity.image}
                     alt=""
                     aria-hidden="true"
                   />
-                  {!depthFailed && <DemonDepthStage key={entity.id} demon={source as Demon} visible={visible} onFailure={() => setDepthFailed(true)} />}
+                  {!mobile && !depthFailed && <DemonDepthStage key={entity.id} demon={source as Demon} visible={visible} onFailure={() => setDepthFailed(true)} />}
                   {glitch && (
                     <span key={glitchNonce} className={styles.demonGlitch} aria-hidden="true">
                       <img className={styles.demonGlitchRed} src={entity.image} alt="" />
@@ -490,11 +526,13 @@ export default function EntityShowcase({ entities, theme }: {
                   )}
                 </>
               ) : (
-                <CharacterStage character={source as Character} displacement={displacement} />
+                mobile
+                  ? <img className="entity-art-snapshot" src={entity.image} alt="" aria-hidden="true" />
+                  : <CharacterStage character={source as Character} displacement={displacement} />
               )}
             </div>
           </div>
-          <CharacterMoteOverlay character={entity} />
+          <CharacterMoteOverlay character={entity} moteCount={demonTheme && mobile ? 25 : undefined} />
           <div className="character-art-shadow" aria-hidden="true" />
           <div className="character-side-kanji" lang="ja">
             <span className="character-side-name">{entity.kanji}</span>
@@ -507,6 +545,7 @@ export default function EntityShowcase({ entities, theme }: {
           </>}
           <div className="character-profile" key={entity.id}>
             {entity.title && <span className={`character-profile-kicker${demonTheme ? ` ${styles.demonTitle}` : ""}`}>{entity.title}</span>}
+            {!demonTheme && <span className="character-mobile-surname">{entity.surname}</span>}
             <h2 id={demonTheme ? "demons-title" : "characters-title"}>{entity.name}</h2>
             <div className="character-name-rule"><span>{demonTheme ? entity.title : entity.surname}</span></div>
             <div className="character-facts">

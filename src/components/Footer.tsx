@@ -55,8 +55,6 @@ export default function Footer() {
   const [visible, setVisible] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
   const dawnRef = useRef<HTMLSpanElement>(null);
-  const slashGlowRef = useRef<SVGPathElement>(null);
-  const slashCoreRef = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     const footer = footerRef.current;
@@ -66,61 +64,82 @@ export default function Footer() {
     observer.observe(footer);
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const context = gsap.context(() => {
-      const backdropSelector = '.section-backdrop-image[data-section-background="footer"]';
-      const paintBackdrop = (motion: { y: number; scale: number }) => {
-        const backdrop = document.querySelector<HTMLImageElement>(backdropSelector);
-        if (!backdrop) return;
-        backdrop.style.translate = `0px ${motion.y}px`;
-        backdrop.style.scale = `${motion.scale}`;
-      };
+    const backdropSelector = '.section-backdrop-image[data-section-background="footer"]';
+    let context: ReturnType<typeof gsap.context> | undefined;
+    let viewportMode = "";
 
-      const glowPath = slashGlowRef.current;
-      const corePath = slashCoreRef.current;
-      const slashPaths = [glowPath, corePath].filter((path): path is SVGPathElement => Boolean(path));
-      slashPaths.forEach((path) => {
-        const length = path.getTotalLength();
-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: reducedMotion ? 0 : length });
-      });
-
-      if (reducedMotion) {
-        if (dawnRef.current) gsap.set(dawnRef.current, { color: "#c1121f" });
-        return;
+    const setupAnimation = () => {
+      const compactViewport = window.matchMedia(
+        "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+      ).matches;
+      const compactLandscape = window.matchMedia(
+        "(max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+      ).matches;
+      const nextViewportMode = `${compactViewport}:${compactLandscape}`;
+      if (nextViewportMode === viewportMode) return;
+      viewportMode = nextViewportMode;
+      context?.revert();
+      const backdrop = document.querySelector<HTMLImageElement>(backdropSelector);
+      if (backdrop) {
+        backdrop.style.translate = "";
+        backdrop.style.scale = "";
+        backdrop.style.objectPosition = "";
       }
 
-      const motion = { y: 62, scale: 1.12 };
-      paintBackdrop(motion);
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: footer,
-          start: "top bottom",
-          end: "top 42%",
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-        },
-      });
-      timeline.to(motion, {
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease: "none",
-        onUpdate: () => paintBackdrop(motion),
-      }, 0);
-      if (dawnRef.current) {
-        timeline.to(dawnRef.current, { color: "#c1121f", duration: 1, ease: "none" }, 0);
-      }
-      if (slashPaths.length) {
-        timeline.to(slashPaths, { strokeDashoffset: 0, duration: 0.78, ease: "none" }, 0.2);
-      }
-    }, footer);
+      const backdropStartY = compactLandscape ? -56 : -60;
+      const backdropEndY = compactLandscape ? -118 : -122;
+      const dawnColor = compactViewport ? "#ff3b3b" : "#c1121f";
+      context = gsap.context(() => {
+        const paintBackdrop = (motion: { y: number; scale: number }) => {
+          const backdrop = document.querySelector<HTMLImageElement>(backdropSelector);
+          if (!backdrop) return;
+          backdrop.style.translate = `0px ${motion.y}px`;
+          backdrop.style.scale = `${motion.scale}`;
+          backdrop.style.objectPosition = compactViewport ? "center bottom" : "";
+        };
+
+        if (reducedMotion) {
+          paintBackdrop({ y: compactViewport ? backdropEndY : 0, scale: 1 });
+          if (dawnRef.current) gsap.set(dawnRef.current, { color: dawnColor });
+          return;
+        }
+
+        const motion = { y: compactViewport ? backdropStartY : 62, scale: 1.12 };
+        paintBackdrop(motion);
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: footer,
+            start: "top bottom",
+            end: "top 42%",
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        });
+        timeline.to(motion, {
+          y: compactViewport ? backdropEndY : 0,
+          scale: 1,
+          duration: 1,
+          ease: "none",
+          onUpdate: () => paintBackdrop(motion),
+        }, 0);
+        if (dawnRef.current) {
+          timeline.to(dawnRef.current, { color: dawnColor, duration: 1, ease: "none" }, 0);
+        }
+      }, footer);
+      ScrollTrigger.refresh();
+    };
+    setupAnimation();
+    window.addEventListener("resize", setupAnimation);
 
     return () => {
+      window.removeEventListener("resize", setupAnimation);
       observer.disconnect();
-      context.revert();
+      context?.revert();
       const backdrop = document.querySelector<HTMLImageElement>('.section-backdrop-image[data-section-background="footer"]');
       if (backdrop) {
         backdrop.style.translate = "";
         backdrop.style.scale = "";
+        backdrop.style.objectPosition = "";
       }
     };
   }, []);
@@ -135,39 +154,11 @@ export default function Footer() {
     <footer ref={footerRef} className={styles.footer} data-visible={visible ? "true" : "false"}>
       <div className={styles.backgroundScrim} aria-hidden="true" />
 
-      <svg className={styles.slash} viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="footer-slash-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#c1121f" />
-            <stop offset="48%" stopColor="#ff6842" />
-            <stop offset="68%" stopColor="#fff0b0" />
-            <stop offset="100%" stopColor="#c1121f" />
-          </linearGradient>
-          <filter id="footer-slash-blur" x="-20%" y="-30%" width="140%" height="160%">
-            <feGaussianBlur stdDeviation="7" />
-          </filter>
-        </defs>
-        <path
-          ref={slashGlowRef}
-          d="M250 335 L875 132"
-          fill="none"
-          stroke="url(#footer-slash-gradient)"
-          strokeWidth="15"
-          strokeLinecap="round"
-          filter="url(#footer-slash-blur)"
-        />
-        <path
-          ref={slashCoreRef}
-          d="M250 335 L875 132"
-          fill="none"
-          stroke="url(#footer-slash-gradient)"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-      </svg>
-
       <div className={styles.headline}>
-        <h2 id="footer-title">The night ends at <span ref={dawnRef}>dawn</span></h2>
+        <h2 id="footer-title">
+          The night ends <br className={styles.mobileBreak} />
+          at <span ref={dawnRef}>dawn</span>
+        </h2>
         <div className={styles.divider} aria-hidden="true">
           <span />
           <FlowerDivider />
@@ -199,6 +190,13 @@ export default function Footer() {
             required
             disabled={submitted}
             aria-label="Email address"
+            onFocus={(event) => {
+              if (!window.matchMedia(
+                "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+              ).matches) return;
+              const input = event.currentTarget;
+              window.setTimeout(() => input.scrollIntoView({ block: "center", behavior: "smooth" }), 300);
+            }}
           />
           <button type="submit" disabled={submitted}>
             {submitted ? "Subscribed ✓" : "Subscribe"}

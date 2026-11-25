@@ -104,7 +104,9 @@ export default function HeroParticles() {
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    const mobileQuery = window.matchMedia("(max-width: 700px)");
+    const mobileQuery = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    );
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updatePreferences = () => {
       setMobile(mobileQuery.matches);
@@ -128,7 +130,7 @@ export default function HeroParticles() {
       frameloop={reducedMotion ? "demand" : "always"}
       gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}
     >
-      <EmberPoints count={mobile ? 48 : 150} frozen={reducedMotion} />
+      <EmberPoints count={mobile ? 29 : 150} frozen={reducedMotion} />
     </Canvas>
   );
 }

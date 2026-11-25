@@ -22,15 +22,25 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       const top = (event as CustomEvent<number>).detail;
       if (Number.isFinite(top)) lenis.scrollTo(top, { immediate: true, force: true });
     };
+    const pauseScroll = () => lenis.stop();
+    const resumeScroll = () => lenis.start();
 
     lenis.on("scroll", updateScrollTrigger);
     window.addEventListener("webmart:lenis-scroll-to", scrollToPosition);
+    window.addEventListener("site-loader:pause", pauseScroll);
+    window.addEventListener("site-loader:resume", resumeScroll);
+    if (
+      document.documentElement.dataset.loaderActive === "true"
+      || (document.querySelector(".loading-screen") && document.documentElement.dataset.loaderExited !== "true")
+    ) lenis.stop();
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
     return () => {
       lenis.off("scroll", updateScrollTrigger);
       window.removeEventListener("webmart:lenis-scroll-to", scrollToPosition);
+      window.removeEventListener("site-loader:pause", pauseScroll);
+      window.removeEventListener("site-loader:resume", resumeScroll);
       gsap.ticker.remove(raf);
       lenis.destroy();
     };
