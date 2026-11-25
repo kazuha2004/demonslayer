@@ -1,0 +1,64 @@
+.branches {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 19.33vw;
+  pointer-events: none;
+}
+
+.branchFrame {
+  position: absolute;
+  top: 0;
+  width: 29vw;
+  height: 19.33vw;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.branchFrameLeft {
+  left: 0;
+  transform-origin: top left;
+  animation: sakura-branch-sway-left 7s ease-in-out infinite alternate;
+}
+
+.branchFrameRight {
+  right: 0;
+  transform-origin: top right;
+  animation: sakura-branch-sway-right 7s ease-in-out infinite alternate;
+}
+
+.branchArtwork {
+  position: absolute;
+  top: 0;
+  width: 58vw;
+  max-width: none;
+  height: auto;
+  opacity: .78;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 24%));
+}
+
+.branchFrameLeft .branchArtwork { left: 0; }
+.branchFrameRight .branchArtwork { right: 0; }
+
+@keyframes sakura-branch-sway-left {
+  from { transform: translate3d(-3px, 0, 0) rotate(-.2deg); }
+  to { transform: translate3d(3px, 0, 0) rotate(.2deg); }
+}
+
+@keyframes sakura-branch-sway-right {
+  from { transform: translate3d(3px, 0, 0) rotate(.2deg); }
+  to { transform: translate3d(-3px, 0, 0) rotate(-.2deg); }
+}
+
+@media (max-width: 700px) {
+  .branches { height: 33.33vw; }
+  .branchFrame { width: 50vw; height: 33.33vw; }
+  .branchArtwork { width: 100vw; opacity: .7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branchFrame { animation: none; }
+  .branchArtwork { filter: none; }
+}
