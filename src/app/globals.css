@@ -4476,8 +4476,8 @@ body.menu-open {
   }
 
   .cinematic-hero {
-    --tj-m-width: min(96vw, 480px);
-    --tj-m-bottom: 3svh;
+    --tj-m-width: min(112vw, 560px);
+    --tj-m-bottom: 2.5svh;
     --tj-m-shift-x: 0%;
     --hero-m-title-width: 84vw;
     --hero-m-vertical-opacity: 0.45;
@@ -4496,12 +4496,12 @@ body.menu-open {
   }
 
   .hero-tanjiro {
-    right: 0;
+    right: auto;
     bottom: calc(var(--tj-m-bottom) + env(safe-area-inset-bottom));
-    left: 0;
+    left: 50%;
     width: var(--tj-m-width);
     height: auto;
-    margin: 0 auto;
+    margin: 0 0 0 calc(var(--tj-m-width) / -2);
     aspect-ratio: 1672 / 941;
     overflow: visible;
     opacity: 1;
