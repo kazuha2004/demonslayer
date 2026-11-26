@@ -127,7 +127,15 @@ export default function Section({
           );
         }
 
-        const nextOverlapId = id === "world" ? "characters" : id === "blade" ? "demons" : null;
+        const nextOverlapId = id === "world"
+          ? "characters"
+          : id === "characters"
+            ? "blade"
+            : id === "blade"
+              ? "demons"
+              : id === "demons"
+                ? "footer"
+                : null;
         if (nextOverlapId) {
           const nextSection = document.getElementById(nextOverlapId);
           if (nextSection) {

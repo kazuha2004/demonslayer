@@ -3,7 +3,7 @@
 }
 
 .demonExperience :global(.characters-pinned-track) {
-  height: 400svh;
+  height: 100svh;
 }
 
 .demonStage {
@@ -409,7 +409,7 @@
   }
 
   .demonExperience :global(.characters-pinned-track) {
-    height: 360svh;
+    height: 100svh;
   }
 
   .demonStage :global(.character-ghost-name) {

@@ -157,24 +157,12 @@ export default function EntityShowcase({ entities, theme }: {
   const transitionPlanRef = useRef<{ index: number; token: number } | null>(null);
   const transitionTokenRef = useRef(0);
   const transitionTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const scrollIndexRef = useRef(0);
-  const scrollStepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const drainQueueRef = useRef<() => void>(() => {});
   const slashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const glitchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const triggerRef = useRef<ScrollTrigger | null>(null);
   const entity = displayEntities[activeIndex];
   const originalEntity = entities[activeIndex];
   const particleKind = entity.id === "tanjiro" || entity.id === "giyu" ? "water" : entity.id;
-
-  const syncPinnedScroll = useCallback((index: number) => {
-    const trigger = triggerRef.current;
-    if (!trigger?.isActive) return;
-    const progress = (index + 0.5) / displayEntities.length;
-    const top = trigger.start + (trigger.end - trigger.start) * progress;
-    scrollIndexRef.current = index;
-    window.dispatchEvent(new CustomEvent("webmart:lenis-scroll-to", { detail: top }));
-  }, [displayEntities.length]);
 
   const drainNavigationQueue = useCallback(() => {
     if (transitionRunningRef.current) return;
@@ -230,17 +218,12 @@ export default function EntityShowcase({ entities, theme }: {
       setGlitchNonce((nonce) => nonce + 1);
       glitchTimer.current = setTimeout(() => setGlitch(false), demonShowcaseTheme.glitchDuration);
     }
-  }, [demonTheme, displayEntities, syncPinnedScroll]);
+  }, [demonTheme, displayEntities]);
 
   drainQueueRef.current = drainNavigationQueue;
 
-  const navigateTo = useCallback((index: number, syncScroll = true, source: "control" | "scroll" = "control") => {
-    if (source === "control" && scrollStepTimerRef.current) {
-      clearTimeout(scrollStepTimerRef.current);
-      scrollStepTimerRef.current = null;
-    }
+  const navigateTo = useCallback((index: number) => {
     const next = (index + displayEntities.length) % displayEntities.length;
-    if (syncScroll) syncPinnedScroll(next);
     const queue = navigationQueueRef.current;
     const tail = queue.length ? queue[queue.length - 1] : activeRef.current;
     if (next === tail) {
@@ -248,7 +231,7 @@ export default function EntityShowcase({ entities, theme }: {
     }
     queue.push(next);
     drainQueueRef.current();
-  }, [displayEntities.length, syncPinnedScroll]);
+  }, [displayEntities.length]);
 
   const navigateBy = useCallback((delta: number) => {
     const queue = navigationQueueRef.current;
@@ -344,56 +327,9 @@ export default function EntityShowcase({ entities, theme }: {
     transitionTimelineRef.current?.kill();
     transitionTimelineRef.current = null;
     gsap.killTweensOf([outgoingArtRef.current, activeArtRef.current, bioRef.current]);
-    if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
     if (slashTimer.current) clearTimeout(slashTimer.current);
     if (glitchTimer.current) clearTimeout(glitchTimer.current);
   }, []);
-
-  useEffect(() => {
-    const section = sceneRef.current;
-    const stage = stageRef.current;
-    if (!section || !stage) return;
-    const mm = gsap.matchMedia();
-
-    mm.add(
-      {
-        isDesktop: "(min-width: 768px) and (not ((max-width: 900px) and (max-height: 500px) and (orientation: landscape)))",
-        isMobile: "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
-      },
-      (context) => {
-        const { isMobile } = context.conditions as { isDesktop: boolean; isMobile: boolean };
-        const trigger = ScrollTrigger.create({
-          trigger: section,
-          pin: isMobile ? false : stage,
-          pinType: !isMobile && demonTheme ? "transform" : undefined,
-          start: "top top",
-          end: "bottom bottom",
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const index = Math.min(displayEntities.length - 1, Math.floor(self.progress * displayEntities.length));
-            if (index === scrollIndexRef.current) return;
-            scrollIndexRef.current = index;
-            if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
-            scrollStepTimerRef.current = setTimeout(() => {
-              scrollStepTimerRef.current = null;
-              navigateTo(index, false, "scroll");
-            }, 80);
-          },
-        });
-        triggerRef.current = trigger;
-        return () => {
-          if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
-          scrollStepTimerRef.current = null;
-          if (triggerRef.current === trigger) triggerRef.current = null;
-          trigger.kill(true);
-        };
-      },
-    );
-
-    return () => {
-      mm.revert();
-    };
-  }, [demonTheme, displayEntities.length, navigateTo]);
 
   useEffect(() => {
     const stage = stageRef.current;

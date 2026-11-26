@@ -1225,7 +1225,7 @@
   inherits: true;
   initial-value: #1e6fd9;
 }
-.characters-pinned-track { position: relative; height: 500svh; }
+.characters-pinned-track { position: relative; height: 100svh; }
 .characters-pinned-stage {
   --character-accent: #1e6fd9;
   position: relative;
@@ -2252,7 +2252,8 @@ a:focus-visible {
 }
 
 #characters.page-section {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 3;
 }
 
@@ -2263,7 +2264,8 @@ a:focus-visible {
 }
 
 #demons.page-section {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 5;
 }
 
@@ -4632,12 +4634,11 @@ body.menu-open {
   }
 
   .characters-pinned-track {
-    height: 360svh;
+    height: 100svh;
   }
 
   .characters-pinned-stage {
-    position: sticky;
-    top: 0;
+    position: relative;
     --showcase-nav-space: max(9svh, 72px);
     --showcase-art-width: 88vw;
     --showcase-art-height: 44svh;
