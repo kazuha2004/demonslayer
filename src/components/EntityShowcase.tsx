@@ -100,25 +100,17 @@ function DemonDecorations({ mobile, visible }: { mobile: boolean; visible: boole
       <div className={styles.demonScrim} />
       {!mobile && <div className={styles.demonGrid} />}
       {mobile ? (
-        <>
-          <div className={`${styles.demonCloud} ${styles.demonCloudRight}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="20vw" /></div>
-          <div className={styles.demonLilies}>
-            {Array.from({ length: petals }, (_, index) => (
-              <i key={index} style={{
-                left: `${(index * 7.13 + 3) % 100}%`,
-                animationDelay: `${-(index * 2.71) % 20}s`,
-                animationDuration: `${18 + (index % 5) * 2.1}s`,
-                "--lily-rotation": `${(index % 2 ? 1 : -1) * (18 + index * 7)}deg`,
-              } as CSSProperties} />
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className={`${styles.demonCloud} ${styles.demonCloudLeft}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
-          <div className={`${styles.demonCloud} ${styles.demonCloudRight}`}><Image src="/ui/cloud-gold.png" alt="" fill sizes="30vw" /></div>
-        </>
-      )}
+        <div className={styles.demonLilies}>
+          {Array.from({ length: petals }, (_, index) => (
+            <i key={index} style={{
+              left: `${(index * 7.13 + 3) % 100}%`,
+              animationDelay: `${-(index * 2.71) % 20}s`,
+              animationDuration: `${18 + (index % 5) * 2.1}s`,
+              "--lily-rotation": `${(index % 2 ? 1 : -1) * (18 + index * 7)}deg`,
+            } as CSSProperties} />
+          ))}
+        </div>
+      ) : null}
       {!mobile && <>
         <div className={styles.demonCheckerLeft} />
         <div className={styles.demonCheckerRight} />
@@ -229,16 +221,14 @@ export default function EntityShowcase({ entities, theme }: {
     setActiveIndex(next);
     setDepthFailed(false);
     setSlash(!reducedMotion);
-    setGlitch(demonTheme && !reducedMotion);
+    setGlitch(!reducedMotion);
     if (slashTimer.current) clearTimeout(slashTimer.current);
     if (glitchTimer.current) clearTimeout(glitchTimer.current);
     if (!reducedMotion) {
       setSlashNonce((nonce) => nonce + 1);
       slashTimer.current = setTimeout(() => setSlash(false), 420);
-      if (demonTheme) {
-        setGlitchNonce((nonce) => nonce + 1);
-        glitchTimer.current = setTimeout(() => setGlitch(false), demonShowcaseTheme.glitchDuration);
-      }
+      setGlitchNonce((nonce) => nonce + 1);
+      glitchTimer.current = setTimeout(() => setGlitch(false), demonShowcaseTheme.glitchDuration);
     }
   }, [demonTheme, displayEntities, syncPinnedScroll]);
 
@@ -366,12 +356,16 @@ export default function EntityShowcase({ entities, theme }: {
     const mm = gsap.matchMedia();
 
     mm.add(
-      "(min-width: 768px) and (not ((max-width: 900px) and (max-height: 500px) and (orientation: landscape)))",
-      () => {
+      {
+        isDesktop: "(min-width: 768px) and (not ((max-width: 900px) and (max-height: 500px) and (orientation: landscape)))",
+        isMobile: "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+      },
+      (context) => {
+        const { isMobile } = context.conditions as { isDesktop: boolean; isMobile: boolean };
         const trigger = ScrollTrigger.create({
           trigger: section,
-          pin: stage,
-          pinType: demonTheme ? "transform" : undefined,
+          pin: isMobile ? false : stage,
+          pinType: !isMobile && demonTheme ? "transform" : undefined,
           start: "top top",
           end: "bottom bottom",
           invalidateOnRefresh: true,
@@ -400,6 +394,48 @@ export default function EntityShowcase({ entities, theme }: {
       mm.revert();
     };
   }, [demonTheme, displayEntities.length, navigateTo]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const context = gsap.context(() => {
+      const intro = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage,
+          start: "top 78%",
+          once: true,
+        },
+      });
+      intro
+        .fromTo(
+          ".character-ghost-name",
+          { autoAlpha: 0, scale: 0.96 },
+          { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power2.out" },
+          0,
+        )
+        .fromTo(
+          ".character-art",
+          { autoAlpha: 0, scale: 0.96 },
+          { autoAlpha: 1, scale: 1, duration: 0.65, ease: "power2.out", clearProps: "transform" },
+          0.06,
+        )
+        .fromTo(
+          ".character-profile > *",
+          { autoAlpha: 0, x: 18 },
+          { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.055, ease: "power2.out", clearProps: "transform" },
+          0.12,
+        )
+        .fromTo(
+          ".character-navigation",
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.45, ease: "power2.out" },
+          0.24,
+        );
+    }, stage);
+
+    return () => context.revert();
+  }, []);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -453,14 +489,14 @@ export default function EntityShowcase({ entities, theme }: {
   const source = originalEntity;
   const stageStyle = {
     "--character-accent": entity.accentColor,
+    "--demon-glitch-offset": `${demonShowcaseTheme.glitchOffset}px`,
+    "--demon-glitch-duration": `${demonShowcaseTheme.glitchDuration}ms`,
     ...(demonTheme ? {
       "--demon-ghost-color": demonShowcaseTheme.ghostColor,
       "--demon-ghost-opacity": `${Math.round(demonShowcaseTheme.ghostOpacity * 100)}%`,
       "--demon-grid-opacity": demonShowcaseTheme.gridOpacity,
       "--demon-checker": demonShowcaseTheme.checkerColor,
       "--demon-scrim-opacity": demonShowcaseTheme.backgroundScrimOpacity,
-      "--demon-glitch-offset": `${demonShowcaseTheme.glitchOffset}px`,
-      "--demon-glitch-duration": `${demonShowcaseTheme.glitchDuration}ms`,
     } : {}),
   } as CSSProperties;
 
@@ -528,19 +564,27 @@ export default function EntityShowcase({ entities, theme }: {
                   )}
                 </>
               ) : (
-                mobile
-                  ? (
-                    <Image
-                      className="entity-art-snapshot"
-                      src={entity.image}
-                      alt=""
-                      fill
-                      sizes="(max-width: 767px) 88vw, 64vw"
-                      priority={activeIndex === 0}
-                      aria-hidden="true"
-                    />
-                  )
-                  : <CharacterStage character={source as Character} displacement={displacement} />
+                <>
+                  {mobile
+                    ? (
+                      <Image
+                        className="entity-art-snapshot"
+                        src={entity.image}
+                        alt=""
+                        fill
+                        sizes="(max-width: 767px) 88vw, 64vw"
+                        priority={activeIndex === 0}
+                        aria-hidden="true"
+                      />
+                    )
+                    : <CharacterStage character={source as Character} displacement={displacement} />}
+                  {glitch && (
+                    <span key={glitchNonce} className={styles.demonGlitch} aria-hidden="true">
+                      <img className={styles.demonGlitchRed} src={entity.image} alt="" />
+                      <img className={styles.demonGlitchCyan} src={entity.image} alt="" />
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -550,11 +594,9 @@ export default function EntityShowcase({ entities, theme }: {
             <span className="character-side-name">{entity.kanji}</span>
             <HankoSeal label="滅" />
           </div>
-          {!demonTheme && <>
-            <div className="character-cloud character-cloud--top" aria-hidden="true"><Image src="/ui/cloud-gold.png" alt="" fill sizes="24vw" /></div>
-            <div className="character-cloud character-cloud--left" aria-hidden="true"><Image src="/ui/cloud-gold.png" alt="" fill sizes="14vw" /></div>
+          {!demonTheme && (
             <div className={`character-particles character-particles--${particleKind}`} aria-hidden="true"><i /><i /><i /><i /><i /></div>
-          </>}
+          )}
           <div className="character-profile" key={entity.id}>
             {entity.title && <span className={`character-profile-kicker${demonTheme ? ` ${styles.demonTitle}` : ""}`}>{entity.title}</span>}
             {!demonTheme && <span className="character-mobile-surname">{entity.surname}</span>}

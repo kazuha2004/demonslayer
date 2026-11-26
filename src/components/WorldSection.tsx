@@ -28,6 +28,12 @@ export default function WorldSection() {
       });
 
       reveal.fromTo(
+        ".world-kicker",
+        { x: -16, autoAlpha: 0 },
+        { x: 0, autoAlpha: 1, duration: 0.45, ease: "power2.out" },
+        0,
+      );
+      reveal.fromTo(
         ".world-quote-line",
         { clipPath: "inset(0 0 100% 0)", y: 14 },
         {
@@ -37,7 +43,7 @@ export default function WorldSection() {
           stagger: 0.19,
           ease: "power2.out",
         },
-        0,
+        0.05,
       );
       reveal.fromTo(
         ".world-hope-underline",
@@ -50,6 +56,12 @@ export default function WorldSection() {
         { xPercent: 16, rotation: -1, autoAlpha: 0.35 },
         { xPercent: 0, rotation: 0, autoAlpha: 1, ease: "none" },
         0,
+      );
+      reveal.fromTo(
+        [".world-japanese", ".world-hanko"],
+        { autoAlpha: 0, scale: 0.94 },
+        { autoAlpha: 1, scale: 1, duration: 0.5, stagger: 0.1, ease: "power2.out" },
+        0.2,
       );
     }, section);
 

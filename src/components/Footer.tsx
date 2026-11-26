@@ -125,6 +125,39 @@ export default function Footer() {
         if (dawnRef.current) {
           timeline.to(dawnRef.current, { color: dawnColor, duration: 1, ease: "none" }, 0);
         }
+
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: footer,
+            start: "top 82%",
+            once: true,
+          },
+        });
+        reveal
+          .fromTo(
+            `.${styles.headline} h2`,
+            { autoAlpha: 0, scale: 0.96 },
+            { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power2.out", clearProps: "transform" },
+            0,
+          )
+          .fromTo(
+            `.${styles.divider}`,
+            { autoAlpha: 0, scaleX: 0.65 },
+            { autoAlpha: 1, scaleX: 1, duration: 0.55, ease: "power2.out", clearProps: "transform" },
+            0.1,
+          )
+          .fromTo(
+            `.${styles.newsletter}`,
+            { autoAlpha: 0, y: 14 },
+            { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", clearProps: "transform" },
+            0.18,
+          )
+          .fromTo(
+            `.${styles.bottomBar}`,
+            { autoAlpha: 0 },
+            { autoAlpha: 1, duration: 0.5, ease: "power2.out" },
+            0.28,
+          );
       }, footer);
       ScrollTrigger.refresh();
     };

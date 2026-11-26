@@ -74,9 +74,10 @@ export default function SectionBackdrop({ children }: { children: ReactNode }) {
 
     images.forEach((image) => {
       const active = image === target;
+      const isHero = image.dataset.sectionBackground === "hero";
       gsap.to(image, {
         opacity: active ? 1 : 0,
-        scale: active ? 1 : inactiveScale,
+        scale: isHero ? 1 : active ? 1 : inactiveScale,
         duration: fadeDuration,
         ease: "power2.inOut",
         overwrite: isMobile ? "auto" : true,

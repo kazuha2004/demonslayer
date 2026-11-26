@@ -13,7 +13,7 @@ export default function HomePage() {
       <Section id="hero" first labelledBy="hero-title">
         <Hero />
       </Section>
-      <Section id="world" labelledBy="world-section-title" entryDirection="left">
+      <Section id="world" labelledBy="world-section-title">
         <WorldSection />
       </Section>
 

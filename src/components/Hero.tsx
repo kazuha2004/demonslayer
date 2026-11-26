@@ -56,6 +56,9 @@ export default function Hero() {
   useEffect(() => {
     if (!loaderExited) return;
     let cleanup: () => void = () => {};
+    const compactOnMount = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    ).matches;
     const timer = window.setTimeout(() => {
       const hero = heroRef.current;
       const tanjiro = tanjiroRef.current;
@@ -100,17 +103,18 @@ export default function Hero() {
       }
 
       const context = gsap.context(() => {
-        const isSmallScreen = window.matchMedia("(max-width: 700px)").matches;
-        gsap.timeline({
+        const worldSection = document.getElementById("world");
+        if (!worldSection) return;
+        gsap.to(hero, {
+          autoAlpha: 0,
+          ease: "none",
           scrollTrigger: {
-            trigger: hero,
-            start: "top top",
-            end: isSmallScreen ? "+=35%" : "+=50%",
-            scrub: 0.8,
+            trigger: worldSection,
+            start: "top 90%",
+            end: "top 15%",
+            scrub: true,
           },
-        })
-          .to(".hero-tanjiro", { yPercent: 8, autoAlpha: 0.35, ease: "none" }, 0)
-          .to(".hero-main-content", { y: -48, autoAlpha: 0, ease: "none" }, 0);
+        });
       }, hero);
 
       cleanup = () => {
@@ -120,7 +124,7 @@ export default function Hero() {
         if (frame) cancelAnimationFrame(frame);
         context.revert();
       };
-    }, 1700);
+    }, compactOnMount ? 0 : 1700);
 
     return () => {
       window.clearTimeout(timer);

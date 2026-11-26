@@ -18,7 +18,7 @@ type SectionProps = {
   last?: boolean;
   allowVerticalMovement?: boolean;
   hasSwipeArea?: boolean;
-  entryDirection?: "vertical" | "left";
+  entryDirection?: "vertical" | "left" | "right";
   labelledBy?: string;
   children: ReactNode;
 };
@@ -81,6 +81,11 @@ export default function Section({
             if (reducedMotion) gsap.set(content, { autoAlpha: 1 });
           },
           onLeaveBack: () => {
+            if (id === "world") activateBackground("hero");
+            if (id === "characters") activateBackground("world");
+            if (id === "blade") activateBackground("characters");
+            if (id === "demons") activateBackground("blade");
+            if (id === "footer") activateBackground("demons");
             if (reducedMotion && !first) gsap.set(content, { autoAlpha: 0 });
           },
         });
@@ -122,7 +127,27 @@ export default function Section({
           );
         }
 
-        if (!last) {
+        const nextOverlapId = id === "world" ? "characters" : id === "blade" ? "demons" : null;
+        if (nextOverlapId) {
+          const nextSection = document.getElementById(nextOverlapId);
+          if (nextSection) {
+            gsap.fromTo(
+              content,
+              { autoAlpha: 1 },
+              {
+                autoAlpha: 0,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: nextSection,
+                  start: "top 90%",
+                  end: "top 15%",
+                  scrub: 1,
+                  onToggle: ({ isActive }) => setWillChange(isActive),
+                },
+              },
+            );
+          }
+        } else if (!last && !first) {
           gsap.fromTo(
             content,
             {

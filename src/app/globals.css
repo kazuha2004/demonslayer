@@ -42,7 +42,7 @@
 .hero-tanjiro img {
   object-fit: contain;
   object-position: center bottom;
-  animation: tanjiro-idle-sway 7s ease-in-out infinite alternate;
+  animation: tanjiro-idle-sway 5.4s ease-in-out infinite alternate;
   filter: drop-shadow(0 18px 34px rgb(0 0 0 / 46%));
 }
 
@@ -96,6 +96,12 @@
 .hero-title-art img {
   mix-blend-mode: screen;
   filter: saturate(1.25) drop-shadow(0 8px 26px rgb(0 0 0 / 24%));
+  animation: hero-title-float 4.8s ease-in-out -1.2s infinite alternate;
+  animation-play-state: paused;
+}
+
+.cinematic-hero.is-intro-ready .hero-title-art img {
+  animation-play-state: running;
 }
 
 .hero-cloud {
@@ -230,8 +236,13 @@
 }
 
 @keyframes tanjiro-idle-sway {
-  from { transform: translate3d(-4px, 0, 0) rotate(-0.4deg); }
-  to { transform: translate3d(4px, 0, 0) rotate(0.4deg); }
+  from { transform: translate3d(-3px, 0, 0) rotate(-0.35deg); }
+  to { transform: translate3d(3px, -8px, 0) rotate(0.35deg); }
+}
+
+@keyframes hero-title-float {
+  from { transform: translate3d(0, 0, 0) rotate(-0.2deg); }
+  to { transform: translate3d(0, -6px, 0) rotate(0.2deg); }
 }
 
 @media (max-width: 1000px) {
@@ -2119,7 +2130,7 @@ html {
 body {
   min-width: 320px;
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: #0a0a12;
   color: var(--paper);
   font-family: var(--font-sans);
@@ -2220,8 +2231,41 @@ a:focus-visible {
 
 .page-section {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   background: transparent;
+}
+
+#hero.page-section {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+#world.page-section {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#characters.page-section {
+  position: relative;
+  z-index: 3;
+}
+
+#blade.page-section {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+#demons.page-section {
+  position: relative;
+  z-index: 5;
+}
+
+#footer.page-section {
+  position: relative;
+  z-index: 6;
 }
 
 .section-content {
@@ -3858,6 +3902,12 @@ body.menu-open {
 .hero-title-art img {
   mix-blend-mode: screen;
   filter: saturate(1.25) drop-shadow(0 8px 26px rgb(0 0 0 / 24%));
+  animation: hero-title-float 4.8s ease-in-out -1.2s infinite alternate;
+  animation-play-state: paused;
+}
+
+.cinematic-hero.is-intro-ready .hero-title-art img {
+  animation-play-state: running;
 }
 
 .hero-cloud {
@@ -4440,15 +4490,16 @@ body.menu-open {
   }
 
   .hero-tanjiro {
-    right: auto;
+    right: 0;
     bottom: calc(var(--tj-m-bottom) + env(safe-area-inset-bottom));
-    left: 50%;
+    left: 0;
     width: var(--tj-m-width);
     height: auto;
+    margin: 0 auto;
     aspect-ratio: 1672 / 941;
     overflow: visible;
     opacity: 1;
-    --hero-tanjiro-intro-x: calc(-50% + var(--tj-m-shift-x));
+    --hero-tanjiro-intro-x: 0px;
   }
 
   .hero-tanjiro img {
@@ -4555,11 +4606,12 @@ body.menu-open {
 
 @keyframes hero-mobile-tanjiro-sway {
   from { transform: translate3d(-2px, 0, 0) rotate(-0.25deg); }
-  to { transform: translate3d(2px, -2px, 0) rotate(0.25deg); }
+  to { transform: translate3d(2px, -6px, 0) rotate(0.25deg); }
 }
 
 @media (prefers-reduced-motion: reduce) and (max-width: 767px) {
   .hero-tanjiro img,
+  .hero-title-art img,
   .hero-cloud,
   .hero-scroll-dot {
     animation: none;
@@ -4576,22 +4628,24 @@ body.menu-open {
   }
 
   .characters-pinned-track {
-    height: 100svh;
+    height: 360svh;
   }
 
   .characters-pinned-stage {
+    position: sticky;
+    top: 0;
     --showcase-nav-space: max(9svh, 72px);
     --showcase-art-width: 88vw;
     --showcase-art-height: 44svh;
-    --showcase-name-size: 34vw;
+    --showcase-name-size: clamp(32px, 16vw, 76px);
     --showcase-row-size: 4vw;
     --showcase-thumb-size: 11vw;
     height: 100svh;
     min-height: 100svh;
     touch-action: pan-y;
     background:
-      radial-gradient(ellipse at 50% 30%, rgb(33 39 48 / 38%), transparent 58%),
-      linear-gradient(180deg, #0b0d12, #101117 54%, #08090d);
+      radial-gradient(ellipse at 50% 30%, rgb(33 39 48 / 28%), transparent 58%),
+      linear-gradient(180deg, rgb(11 13 18 / 38%), rgb(16 17 23 / 52%) 54%, rgb(8 9 13 / 82%));
   }
 
   .characters-pinned-stage .characters-stage-tint {
@@ -4602,15 +4656,14 @@ body.menu-open {
     z-index: 2;
     top: calc(var(--showcase-nav-space) + 2svh);
     left: 50%;
-    width: 88%;
-    max-width: 88%;
+    width: 92%;
+    max-width: 92%;
     color: rgb(231 223 209 / 25%);
     font-size: var(--showcase-name-size);
-    letter-spacing: -0.08em;
+    letter-spacing: -0.04em;
     line-height: 0.9;
     text-align: center;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
     translate: -50% 0;
     animation: none;
     -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
@@ -5139,7 +5192,8 @@ html.site-loading body {
     transition: none;
   }
 
-  .cinematic-hero .hero-tanjiro img {
+  .cinematic-hero .hero-tanjiro img,
+  .cinematic-hero .hero-title-art img {
     animation: none;
   }
 }

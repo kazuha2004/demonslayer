@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type TouchEvent } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionLabel from "@/components/SectionLabel";
+
+gsap.registerPlugin(ScrollTrigger);
 import HankoSeal from "@/components/HankoSeal";
 import { bladeSectionCopy, blades, giyuBlade, giyuEnabled, type Blade } from "@/data/content";
 import styles from "./BladeExperience.module.css";
@@ -358,8 +361,10 @@ export default function BladeExperience() {
     return () => {
       observer.disconnect();
       window.removeEventListener("keydown", onKey);
-      section.removeEventListener("pointermove", onPointerMove);
-      section.removeEventListener("pointerleave", onPointerLeave);
+      if (finePointer) {
+        section.removeEventListener("pointermove", onPointerMove);
+        section.removeEventListener("pointerleave", onPointerLeave);
+      }
       floatTween?.kill();
       sectionActive.current = false;
       gsap.killTweensOf(Array.from(section.querySelectorAll(
@@ -369,6 +374,48 @@ export default function BladeExperience() {
       if (flashRef.current) gsap.killTweensOf(flashRef.current);
     };
   }, [changeTo]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || reducedMotion()) return;
+
+    const context = gsap.context(() => {
+      const intro = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+          once: true,
+        },
+      });
+      intro
+        .fromTo(
+          `.${styles.left} > *`,
+          { autoAlpha: 0, x: -16 },
+          { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.055, ease: "power2.out", clearProps: "transform" },
+          0,
+        )
+        .fromTo(
+          `.${styles.center}`,
+          { autoAlpha: 0, scale: 0.94 },
+          { autoAlpha: 1, scale: 1, duration: 0.65, ease: "power2.out", clearProps: "transform" },
+          0.08,
+        )
+        .fromTo(
+          [`.${styles.properties} h2`, `.${styles.rightDescription}`, `.${styles.propertyRow}`],
+          { autoAlpha: 0, x: 16 },
+          { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.05, ease: "power2.out", clearProps: "transform" },
+          0.14,
+        )
+        .fromTo(
+          `.${styles.controls}`,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.45, ease: "power2.out" },
+          0.26,
+        );
+    }, section);
+
+    return () => context.revert();
+  }, []);
 
   const onTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
