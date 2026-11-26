@@ -17,15 +17,15 @@ export default function HomePage() {
         <WorldSection />
       </Section>
 
-      <Section id="characters" labelledBy="characters-title" allowVerticalMovement={false}>
+      <Section id="characters" labelledBy="characters-title" allowVerticalMovement={false} hasSwipeArea>
         <EntityShowcase entities={characters} theme="characters" />
       </Section>
 
-      <Section id="blade" labelledBy="blades-title">
+      <Section id="blade" labelledBy="blades-title" hasSwipeArea>
         <BladeExperience />
       </Section>
 
-      <Section id="demons" labelledBy="demons-title">
+      <Section id="demons" labelledBy="demons-title" hasSwipeArea>
         <EntityShowcase entities={demons} theme="demons" />
       </Section>
 

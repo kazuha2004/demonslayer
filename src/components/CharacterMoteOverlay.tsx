@@ -98,6 +98,8 @@ function drawButterfly(context: CanvasRenderingContext2D, mote: Mote, time: numb
   context.restore();
 }
 
+export const MOBILE_MOTE_COUNT = 25;
+
 export default function CharacterMoteOverlay({
   character,
   moteCount,
@@ -121,12 +123,13 @@ export default function CharacterMoteOverlay({
     const backDrawingContext: CanvasRenderingContext2D = backContext;
     const frontDrawingContext: CanvasRenderingContext2D = frontContext;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) return;
     const isMobile = window.matchMedia(
       "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
     ).matches;
     const desktop = window.matchMedia("(pointer: fine)").matches && !isMobile;
     const isGiyu = character.id === "giyu";
-    const amount = moteCount ?? (isMobile ? 4 : isGiyu ? 45 : 70);
+    const amount = moteCount ?? (isMobile ? MOBILE_MOTE_COUNT : isGiyu ? 45 : 70);
     const now = performance.now();
     setsRef.current.forEach((set) => {
       if (!set.exiting) {

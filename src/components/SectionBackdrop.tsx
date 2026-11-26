@@ -14,10 +14,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export const BACKGROUND_FADE_DURATION = 1.2;
+export const MOBILE_BACKGROUND_FADE_DURATION = 0.8;
+export const MOBILE_BACKGROUND_SCALE = 1.03;
+export const MOBILE_IMAGE_MAX_WIDTH = 1200;
 export const BACKGROUND_SWITCH_POINT = "top center";
 export const CONTENT_DRIFT_DISTANCE = 70;
+export const MOBILE_CONTENT_DRIFT_DISTANCE = 30;
 
 type SectionBackdropContextValue = {
   registerSection: (id: string) => void;
@@ -57,6 +62,10 @@ export default function SectionBackdrop({ children }: { children: ReactNode }) {
     activeIdRef.current = id;
     gsap.killTweensOf(images);
 
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const inactiveScale = isMobile ? MOBILE_BACKGROUND_SCALE : 1.06;
+    const fadeDuration = isMobile ? MOBILE_BACKGROUND_FADE_DURATION : BACKGROUND_FADE_DURATION;
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       gsap.set(images, { opacity: 0, scale: 1 });
       gsap.set(target, { opacity: 1 });
@@ -67,10 +76,10 @@ export default function SectionBackdrop({ children }: { children: ReactNode }) {
       const active = image === target;
       gsap.to(image, {
         opacity: active ? 1 : 0,
-        scale: active ? 1 : 1.06,
-        duration: BACKGROUND_FADE_DURATION,
+        scale: active ? 1 : inactiveScale,
+        duration: fadeDuration,
         ease: "power2.inOut",
-        overwrite: true,
+        overwrite: isMobile ? "auto" : true,
       });
     });
   }, []);
@@ -94,7 +103,11 @@ export default function SectionBackdrop({ children }: { children: ReactNode }) {
     if (pendingImages.length === 0) refresh();
 
     const onWindowLoad = () => refresh();
+    const onOrientationChange = () => {
+      window.setTimeout(refresh, 180);
+    };
     window.addEventListener("load", onWindowLoad);
+    window.addEventListener("orientationchange", onOrientationChange);
     void document.fonts.ready.then(() => {
       if (active) refresh();
     });
@@ -106,6 +119,7 @@ export default function SectionBackdrop({ children }: { children: ReactNode }) {
         image.removeEventListener("error", refreshWhenImagesReady);
       });
       window.removeEventListener("load", onWindowLoad);
+      window.removeEventListener("orientationchange", onOrientationChange);
     };
   }, []);
 

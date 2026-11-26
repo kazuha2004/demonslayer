@@ -741,6 +741,17 @@
   .experience {
     min-height: max(100svh, 960px);
     align-items: flex-start;
+    touch-action: pan-y;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .calloutLines path[data-callout-line] {
+    display: none;
+  }
+
+  .callout span {
+    display: none;
   }
 
   .scrim {
@@ -959,6 +970,14 @@
 
 }
 
+@media (hover: none), (pointer: coarse) {
+  .swatch:hover,
+  .arrows button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 390px) {
   .inner {
     padding-right: 19px;
@@ -1000,14 +1019,20 @@
 }
 
 @media (max-width: 767px) {
+  .description {
+    font-size: 14px;
+  }
+
   .swatches {
-    gap: 7px;
+    gap: 8px;
   }
 
   .swatch {
-    width: 42px;
-    height: 42px;
-    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 11px;
   }
 
   .center {
@@ -1040,6 +1065,14 @@
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .swatch:hover,
+  .arrows button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 390px) {
   .inner {
     padding-right: 17px;
@@ -1047,12 +1080,14 @@
   }
 
   .swatches {
-    gap: 5px;
+    gap: 8px;
   }
 
   .swatch {
-    width: 40px;
-    height: 40px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
   }
 
   .propertyRow {

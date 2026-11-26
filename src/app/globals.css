@@ -1932,6 +1932,47 @@
   }
 }
 
+@media (max-width: 767px) {
+  .world-section {
+    min-height: 100svh;
+    min-height: 820px;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .world-lantern-glow {
+    top: 4%;
+    opacity: 0.42;
+    pointer-events: none;
+  }
+
+  .world-quote {
+    top: calc(13svh + env(safe-area-inset-top));
+    left: 6vw;
+    width: 88vw;
+  }
+
+  .world-quote h2 {
+    max-width: 88vw;
+    font-size: clamp(2rem, 8.8vw, 3rem);
+  }
+
+  .world-washi-panel {
+    top: auto;
+    right: 6vw;
+    bottom: calc(13svh + env(safe-area-inset-bottom));
+    left: 6vw;
+    width: 88vw;
+    min-height: max(36svh, 300px);
+    padding: 6vw;
+  }
+
+  .world-washi-panel > p {
+    font-size: clamp(14px, 3.6vw, 16px);
+    line-height: 1.65;
+  }
+}
+
 @media (max-width: 520px) {
   .world-section {
     min-height: 100svh;
@@ -2124,7 +2165,8 @@ a:focus-visible {
 }
 
 .site-frame {
-  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
   isolation: isolate;
 }
 
@@ -2717,7 +2759,7 @@ a:focus-visible {
   z-index: 49;
   inset: 0;
   display: flex;
-  padding: 100px 9vw 50px;
+  padding: calc(88px + env(safe-area-inset-top)) 9vw calc(44px + env(safe-area-inset-bottom));
   flex-direction: column;
   justify-content: space-between;
   background: #121211;
@@ -2725,6 +2767,38 @@ a:focus-visible {
   opacity: 0;
   pointer-events: none;
   transition: opacity 300ms ease, visibility 300ms ease;
+}
+
+.mobile-menu-close {
+  position: absolute;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid rgb(231 223 209 / 28%);
+  background: transparent;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+}
+
+.mobile-menu-close:focus-visible,
+.mobile-menu-links a:focus-visible,
+.menu-trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+html.menu-open,
+body.menu-open {
+  overflow: hidden;
+  touch-action: none;
 }
 
 .mobile-menu.is-open {
@@ -4234,17 +4308,58 @@ a:focus-visible {
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 767px) {
+  .world-section {
+    min-height: 100svh;
+    min-height: 820px;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .world-lantern-glow {
+    top: 4%;
+    opacity: 0.42;
+    pointer-events: none;
+  }
+
+  .world-quote {
+    top: calc(13svh + env(safe-area-inset-top));
+    left: 6vw;
+    width: 88vw;
+  }
+
+  .world-quote h2 {
+    max-width: 88vw;
+    font-size: clamp(2rem, 8.8vw, 3rem);
+  }
+
   .world-washi-panel {
-    right: 8vw;
-    left: 8vw;
-    width: auto;
-    min-height: max(37vh, 360px);
+    top: auto;
+    right: 6vw;
+    bottom: calc(13svh + env(safe-area-inset-bottom));
+    left: 6vw;
+    width: 88vw;
+    min-height: max(36svh, 300px);
     padding: 6vw;
   }
 
   .world-washi-panel > p {
-    font-size: clamp(13px, 3.6vw, 15px);
+    font-size: clamp(14px, 3.6vw, 16px);
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 520px) {
+  .world-washi-panel {
+    right: 6vw;
+    left: 6vw;
+    width: 88vw;
+    min-height: max(36svh, 300px);
+    padding: 6vw;
+  }
+
+  .world-washi-panel > p {
+    font-size: clamp(14px, 3.6vw, 16px);
   }
 
   .world-quote h2 {
@@ -4285,14 +4400,24 @@ a:focus-visible {
 }
 
 @media (max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .page-section {
+    min-height: 100svh;
+  }
+
+  .section-content {
+    will-change: auto;
+  }
+
   .cinematic-hero {
-    --tj-m-width: 124vw;
-    --tj-m-bottom: 4vh;
-    --tj-m-shift-x: 18%;
+    --tj-m-width: min(96vw, 480px);
+    --tj-m-bottom: 3svh;
+    --tj-m-shift-x: 0%;
     --hero-m-title-width: 84vw;
-    --hero-m-vertical-opacity: 0.7;
+    --hero-m-vertical-opacity: 0.45;
     height: 100svh;
     min-height: 100svh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     overflow: hidden;
   }
 
@@ -4322,7 +4447,7 @@ a:focus-visible {
   }
 
   .hero-main-content {
-    top: calc(72px + env(safe-area-inset-top) + 108px);
+    top: calc(68px + env(safe-area-inset-top) + 32px);
     right: 0;
     left: 0;
     width: 100%;
@@ -4341,8 +4466,8 @@ a:focus-visible {
 
   .hero-japanese-left,
   .hero-japanese-right {
-    top: 50%;
-    font-size: clamp(10px, 3vw, 16px);
+    top: 52%;
+    font-size: 10px;
     opacity: var(--hero-m-vertical-opacity);
     transform: translateY(-50%);
   }
@@ -4669,8 +4794,10 @@ a:focus-visible {
 
   .characters-pinned-stage .character-arrows button {
     position: static;
-    width: 9vw;
-    height: 9vw;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     margin: 0;
     border-color: rgb(205 187 151 / 72%);
     background: rgb(12 13 16 / 54%);
@@ -4695,15 +4822,23 @@ a:focus-visible {
     grid-column: 2;
     grid-row: 1;
     justify-content: center;
-    gap: clamp(4px, 1vw, 7px);
+    gap: 8px;
     transform: none;
   }
 
   .characters-pinned-stage .character-thumbnails button {
-    width: var(--showcase-thumb-size);
-    height: var(--showcase-thumb-size);
+    min-width: 44px;
+    min-height: 44px;
+    width: clamp(44px, 11vw, 48px);
+    height: clamp(44px, 11vw, 48px);
     padding: 2px;
     border-width: 1px;
+  }
+
+  .characters-pinned-stage .character-arrows button:focus-visible,
+  .characters-pinned-stage .character-thumbnails button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
   }
 
   .characters-pinned-stage .character-thumbnails button.is-active {
@@ -5182,13 +5317,18 @@ html:has(.loading-screen) body {
 }
 
 .loading-skip {
-  margin-top: 18px;
-  padding: 5px 8px;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  padding: 8px 14px;
   border: 0;
   background: transparent;
   color: rgb(231 223 209 / 72%);
   font-family: var(--font-mincho);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .12em;
   text-decoration: underline;
   text-underline-offset: 4px;

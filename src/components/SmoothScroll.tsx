@@ -9,9 +9,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
     const lenis = new Lenis({
       duration: 1.15,
-      smoothWheel: true,
+      smoothWheel: !isTouch,
+      syncTouch: false,
       wheelMultiplier: 0.9,
       touchMultiplier: 1.2,
     });
@@ -19,8 +21,22 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     const updateScrollTrigger = () => ScrollTrigger.update();
     const raf = (time: number) => lenis.raf(time * 1000);
     const scrollToPosition = (event: Event) => {
-      const top = (event as CustomEvent<number>).detail;
-      if (Number.isFinite(top)) lenis.scrollTo(top, { immediate: true, force: true });
+      const detail = (event as CustomEvent<number | { top: number; smooth?: boolean }>).detail;
+      const top = typeof detail === "number" ? detail : detail?.top;
+      const smooth = typeof detail === "object" && detail?.smooth;
+      if (!Number.isFinite(top)) return;
+      if (smooth) {
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const state = { y: window.scrollY };
+        gsap.to(state, {
+          y: top,
+          duration: reducedMotion ? 0 : 0.75,
+          ease: "power2.inOut",
+          onUpdate: () => window.scrollTo(0, state.y),
+        });
+      } else {
+        lenis.scrollTo(top, { immediate: true, force: true });
+      }
     };
     const pauseScroll = () => lenis.stop();
     const resumeScroll = () => lenis.start();

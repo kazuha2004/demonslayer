@@ -9,6 +9,8 @@ import { bladeSectionCopy, blades, giyuBlade, giyuEnabled, type Blade } from "@/
 import styles from "./BladeExperience.module.css";
 
 const bladeOptions = giyuEnabled ? [...blades, giyuBlade] : blades;
+export const MOBILE_BLADE_EMBER_COUNT = 25;
+export const MOBILE_BLADE_BUTTERFLY_COUNT = 9;
 
 function PropertyIcon({ kind }: { kind: Blade["properties"][number]["icon"] }) {
   return (
@@ -43,6 +45,7 @@ function SpiritCanvas({ blade }: { blade: Blade }) {
     let width = 0;
     let height = 0;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) return;
     const particles: { x: number; y: number; radius: number; speed: number; drift: number; phase: number }[] = [];
     const resize = () => {
       const bounds = scene.getBoundingClientRect();
@@ -53,7 +56,9 @@ function SpiritCanvas({ blade }: { blade: Blade }) {
       canvas.height = Math.max(1, Math.round(height * dpr));
       drawingContext.setTransform(dpr, 0, 0, dpr, 0, 0);
       const isMobile = window.innerWidth < 768;
-      const amount = blade.id === "butterfly" ? (isMobile ? 9 : 22) : (isMobile ? 25 : 60);
+      const amount = blade.id === "butterfly"
+        ? (isMobile ? MOBILE_BLADE_BUTTERFLY_COUNT : 22)
+        : (isMobile ? MOBILE_BLADE_EMBER_COUNT : 60);
       particles.length = 0;
       for (let i = 0; i < amount; i += 1) {
         particles.push({
@@ -318,12 +323,13 @@ export default function BladeExperience() {
     const tilt = tiltRef.current;
     const floating = floatRef.current;
     const kanji = kanjiRef.current;
-    const moveX = tilt ? gsap.quickTo(tilt, "rotationY", { duration: 0.65, ease: "power3.out" }) : null;
-    const moveY = tilt ? gsap.quickTo(tilt, "rotationX", { duration: 0.65, ease: "power3.out" }) : null;
-    const kanjiX = kanji ? gsap.quickTo(kanji, "x", { duration: 0.8, ease: "power2.out" }) : null;
-    const kanjiY = kanji ? gsap.quickTo(kanji, "y", { duration: 0.8, ease: "power2.out" }) : null;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const moveX = finePointer && tilt ? gsap.quickTo(tilt, "rotationY", { duration: 0.65, ease: "power3.out" }) : null;
+    const moveY = finePointer && tilt ? gsap.quickTo(tilt, "rotationX", { duration: 0.65, ease: "power3.out" }) : null;
+    const kanjiX = finePointer && kanji ? gsap.quickTo(kanji, "x", { duration: 0.8, ease: "power2.out" }) : null;
+    const kanjiY = finePointer && kanji ? gsap.quickTo(kanji, "y", { duration: 0.8, ease: "power2.out" }) : null;
     const onPointerMove = (event: PointerEvent) => {
-      if (!sectionActive.current || event.pointerType === "touch" || !tilt) return;
+      if (!finePointer || !sectionActive.current || event.pointerType === "touch" || !tilt) return;
       const rect = section.getBoundingClientRect();
       moveX?.(((event.clientX - rect.left) / rect.width - 0.5) * 3.2);
       moveY?.((0.5 - (event.clientY - rect.top) / rect.height) * 2.2);
@@ -336,8 +342,10 @@ export default function BladeExperience() {
       kanjiX?.(0);
       kanjiY?.(0);
     };
-    section.addEventListener("pointermove", onPointerMove);
-    section.addEventListener("pointerleave", onPointerLeave);
+    if (finePointer) {
+      section.addEventListener("pointermove", onPointerMove);
+      section.addEventListener("pointerleave", onPointerLeave);
+    }
     if (floating && !reducedMotion()) {
       if (window.matchMedia("(pointer: coarse)").matches) {
         floatTween = gsap.to(floating, { y: -7, duration: 3.6, yoyo: true, repeat: -1, ease: "sine.inOut" });

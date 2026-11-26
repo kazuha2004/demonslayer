@@ -43,12 +43,9 @@ export default function Hero() {
     if (!hero) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setParticlesReady(true);
-          observer.disconnect();
-        }
+        setParticlesReady(entry.isIntersecting);
       },
-      { rootMargin: "100px" },
+      { rootMargin: "200px" },
     );
     observer.observe(hero);
     return () => {

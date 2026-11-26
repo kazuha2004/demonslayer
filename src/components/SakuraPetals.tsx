@@ -32,6 +32,8 @@ function createPetal(width: number, height: number, visible = false): Petal {
   };
 }
 
+export const MOBILE_PETAL_COUNT = 8;
+
 export default function SakuraPetals() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -80,7 +82,7 @@ export default function SakuraPetals() {
       narrowViewport = window.matchMedia(
         "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
       ).matches;
-      const count = mobile ? 12 : Math.min(42, Math.max(22, Math.round(width / 34)));
+      const count = mobile ? MOBILE_PETAL_COUNT : Math.min(42, Math.max(22, Math.round(width / 34)));
       petals = Array.from({ length: count }, () => createPetal(width, height, true));
     };
 

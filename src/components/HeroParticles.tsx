@@ -99,6 +99,9 @@ function EmberPoints({ count, frozen }: { count: number; frozen: boolean }) {
   );
 }
 
+export const DESKTOP_HERO_EMBER_COUNT = 150;
+export const MOBILE_HERO_EMBER_COUNT = 60;
+
 export default function HeroParticles() {
   const [mobile, setMobile] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -121,16 +124,18 @@ export default function HeroParticles() {
     };
   }, []);
 
+  if (reducedMotion) return null;
+
   return (
     <Canvas
       className="hero-particles"
       aria-hidden="true"
       dpr={[1, 1.5]}
       camera={{ position: [0, 0, 5], fov: 50 }}
-      frameloop={reducedMotion ? "demand" : "always"}
+      frameloop="always"
       gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}
     >
-      <EmberPoints count={mobile ? 29 : 150} frozen={reducedMotion} />
+      <EmberPoints count={mobile ? MOBILE_HERO_EMBER_COUNT : DESKTOP_HERO_EMBER_COUNT} frozen={false} />
     </Canvas>
   );
 }

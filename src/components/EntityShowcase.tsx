@@ -287,7 +287,7 @@ export default function EntityShowcase({ entities, theme }: {
           x: 0,
           y: 0,
           scale: 1,
-          clearProps: "transform,filter",
+          clearProps: "transform,filter,willChange",
         });
       }
       if (incoming) {
@@ -298,7 +298,7 @@ export default function EntityShowcase({ entities, theme }: {
           x: 0,
           y: 0,
           scale: 1,
-          clearProps: "transform,filter",
+          clearProps: "transform,filter,willChange",
         });
       }
       if (bio) gsap.set(bio, { autoAlpha: 1, y: 0 });
@@ -316,18 +316,21 @@ export default function EntityShowcase({ entities, theme }: {
       return;
     }
 
+    const isMobileView = window.matchMedia(
+      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
+    ).matches;
     timeline = gsap.timeline({ onComplete: finish, onInterrupt: finish });
     transitionTimelineRef.current = timeline;
     if (outgoing) {
       timeline.fromTo(outgoing,
-        { autoAlpha: 1, x: 0, y: 0, scale: 1, filter: "none" },
-        { autoAlpha: 0, x: -12, y: 0, scale: 0.99, filter: "blur(1px)", duration: 0.34, ease: "power2.inOut", overwrite: "auto" },
+        { autoAlpha: 1, x: 0, y: 0, scale: 1, willChange: "transform, opacity", ...(isMobileView ? {} : { filter: "none" }) },
+        { autoAlpha: 0, x: -12, y: 0, scale: 0.99, ...(isMobileView ? {} : { filter: "blur(1px)" }), duration: isMobileView ? 0.28 : 0.34, ease: "power2.inOut", overwrite: "auto" },
         0,
       );
     }
     timeline.fromTo(incoming,
-      { autoAlpha: 0, x: 12, y: 0, scale: 0.99, filter: "blur(1px)" },
-      { autoAlpha: 1, x: 0, y: 0, scale: 1, filter: "none", duration: 0.34, ease: "power2.out", overwrite: "auto" },
+      { autoAlpha: 0, x: 12, y: 0, scale: 0.99, willChange: "transform, opacity", ...(isMobileView ? {} : { filter: "blur(1px)" }) },
+      { autoAlpha: 1, x: 0, y: 0, scale: 1, ...(isMobileView ? {} : { filter: "none" }), duration: isMobileView ? 0.28 : 0.34, ease: "power2.out", overwrite: "auto" },
       0,
     );
     if (bio) {
@@ -360,46 +363,43 @@ export default function EntityShowcase({ entities, theme }: {
     const section = sceneRef.current;
     const stage = stageRef.current;
     if (!section || !stage) return;
-    const mobileQuery = window.matchMedia(
-      "(max-width: 767px), (max-width: 900px) and (max-height: 500px) and (orientation: landscape)",
-    );
-    let trigger: ScrollTrigger | null = null;
-    const updatePinning = () => {
-      trigger?.kill(true);
-      trigger = null;
-      triggerRef.current = null;
-      if (mobileQuery.matches) return;
+    const mm = gsap.matchMedia();
 
-      trigger = ScrollTrigger.create({
-        trigger: section,
-        pin: stage,
-        pinType: demonTheme ? "transform" : undefined,
-        start: "top top",
-        end: "bottom bottom",
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const index = Math.min(displayEntities.length - 1, Math.floor(self.progress * displayEntities.length));
-          if (index === scrollIndexRef.current) return;
-          scrollIndexRef.current = index;
+    mm.add(
+      "(min-width: 768px) and (not ((max-width: 900px) and (max-height: 500px) and (orientation: landscape)))",
+      () => {
+        const trigger = ScrollTrigger.create({
+          trigger: section,
+          pin: stage,
+          pinType: demonTheme ? "transform" : undefined,
+          start: "top top",
+          end: "bottom bottom",
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const index = Math.min(displayEntities.length - 1, Math.floor(self.progress * displayEntities.length));
+            if (index === scrollIndexRef.current) return;
+            scrollIndexRef.current = index;
+            if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
+            scrollStepTimerRef.current = setTimeout(() => {
+              scrollStepTimerRef.current = null;
+              navigateTo(index, false, "scroll");
+            }, 80);
+          },
+        });
+        triggerRef.current = trigger;
+        return () => {
           if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
-          scrollStepTimerRef.current = setTimeout(() => {
-            scrollStepTimerRef.current = null;
-            navigateTo(index, false, "scroll");
-          }, 80);
-        },
-      });
-      triggerRef.current = trigger;
-    };
-    updatePinning();
-    mobileQuery.addEventListener("change", updatePinning);
+          scrollStepTimerRef.current = null;
+          if (triggerRef.current === trigger) triggerRef.current = null;
+          trigger.kill(true);
+        };
+      },
+    );
+
     return () => {
-      mobileQuery.removeEventListener("change", updatePinning);
-      if (scrollStepTimerRef.current) clearTimeout(scrollStepTimerRef.current);
-      scrollStepTimerRef.current = null;
-      if (triggerRef.current === trigger) triggerRef.current = null;
-      trigger?.kill(true);
+      mm.revert();
     };
-  }, [displayEntities.length, navigateTo]);
+  }, [demonTheme, displayEntities.length, navigateTo]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -511,10 +511,12 @@ export default function EntityShowcase({ entities, theme }: {
                     style={{ "--demon-aura-color": entity.accentColor } as CSSProperties}
                     aria-hidden="true"
                   />
-                  <img
+                  <Image
                     className={`${styles.demonFallback}${depthFailed || mobile ? ` ${styles.isFallback}` : ""}`}
                     src={entity.image}
                     alt=""
+                    fill
+                    sizes="(max-width: 767px) 88vw, 64vw"
                     aria-hidden="true"
                   />
                   {!mobile && !depthFailed && <DemonDepthStage key={entity.id} demon={source as Demon} visible={visible} onFailure={() => setDepthFailed(true)} />}
@@ -527,7 +529,17 @@ export default function EntityShowcase({ entities, theme }: {
                 </>
               ) : (
                 mobile
-                  ? <img className="entity-art-snapshot" src={entity.image} alt="" aria-hidden="true" />
+                  ? (
+                    <Image
+                      className="entity-art-snapshot"
+                      src={entity.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 767px) 88vw, 64vw"
+                      priority={activeIndex === 0}
+                      aria-hidden="true"
+                    />
+                  )
                   : <CharacterStage character={source as Character} displacement={displacement} />
               )}
             </div>
@@ -576,9 +588,12 @@ export default function EntityShowcase({ entities, theme }: {
                 <button type="button" key={item.id} onClick={() => navigateTo(index)}
                   className={index === activeIndex ? "is-active" : ""}
                   aria-label={`Show ${item.name}${item.surname ? ` ${item.surname}` : ""}`} aria-pressed={index === activeIndex}>
-                  <img
+                  <Image
                     src={item.image}
                     alt=""
+                    width={96}
+                    height={96}
+                    sizes="64px"
                     loading="lazy"
                     decoding="async"
                     style={demonTheme ? {

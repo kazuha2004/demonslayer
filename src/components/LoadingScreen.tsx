@@ -14,6 +14,7 @@ const HERO_IMAGE_SELECTORS = [
 ];
 const SESSION_KEY = "webmart:moonrise-loader-seen";
 const FIRST_VISIT_MINIMUM_MS = 1800;
+const MOBILE_FIRST_VISIT_MINIMUM_MS = 1400;
 const REPEAT_VISIT_DURATION_MS = 800;
 const SAFETY_TIMEOUT_MS = 8000;
 const EXIT_DURATION_MS = 1200;
@@ -62,7 +63,8 @@ export default function LoadingScreen() {
     if (exitStartedRef.current) return;
     exitStartedRef.current = true;
     setProgress(100);
-    startHeroIntro();
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) startHeroIntro();
     setExiting(true);
     const exitDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? REDUCED_MOTION_EXIT_DURATION_MS
@@ -121,7 +123,10 @@ export default function LoadingScreen() {
       if (completed !== totalTasks || scheduledExit) return;
 
       scheduledExit = true;
-      const remaining = Math.max(0, FIRST_VISIT_MINIMUM_MS - (performance.now() - startedAt));
+      const minMs = window.matchMedia("(max-width: 767px)").matches
+        ? MOBILE_FIRST_VISIT_MINIMUM_MS
+        : FIRST_VISIT_MINIMUM_MS;
+      const remaining = Math.max(0, minMs - (performance.now() - startedAt));
       exitTimerRef.current = window.setTimeout(beginExit, remaining);
     };
 
