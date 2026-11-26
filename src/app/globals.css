@@ -2239,41 +2239,6 @@ a:focus-visible {
   background: transparent;
 }
 
-#hero.page-section {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-#world.page-section {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-#characters.page-section {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
-
-#blade.page-section {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-}
-
-#demons.page-section {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-
-#footer.page-section {
-  position: relative;
-  z-index: 6;
-}
-
 .section-content {
   position: relative;
   will-change: opacity, transform;

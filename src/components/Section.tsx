@@ -57,8 +57,6 @@ export default function Section({
         const canMoveVertically = allowVerticalMovement && !(isMobile && hasSwipeArea);
         const enterStart = isMobile ? "top 92%" : "top bottom";
         const enterEnd = isMobile ? "top 38%" : "top center";
-        const exitStart = isMobile ? "bottom 62%" : "bottom center";
-        const exitEnd = isMobile ? "bottom 8%" : "bottom top";
 
         const setWillChange = (active: boolean) => {
           if (!isMobile) return;
@@ -120,56 +118,6 @@ export default function Section({
                 trigger: section,
                 start: enterStart,
                 end: enterEnd,
-                scrub: 1,
-                onToggle: ({ isActive }) => setWillChange(isActive),
-              },
-            },
-          );
-        }
-
-        const nextOverlapId = id === "world"
-          ? "characters"
-          : id === "characters"
-            ? "blade"
-            : id === "blade"
-              ? "demons"
-              : id === "demons"
-                ? "footer"
-                : null;
-        if (nextOverlapId) {
-          const nextSection = document.getElementById(nextOverlapId);
-          if (nextSection) {
-            gsap.fromTo(
-              content,
-              { autoAlpha: 1 },
-              {
-                autoAlpha: 0,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: nextSection,
-                  start: "top 90%",
-                  end: "top 15%",
-                  scrub: 1,
-                  onToggle: ({ isActive }) => setWillChange(isActive),
-                },
-              },
-            );
-          }
-        } else if (!last && !first) {
-          gsap.fromTo(
-            content,
-            {
-              autoAlpha: 1,
-              ...(canMoveVertically ? { y: 0 } : {}),
-            },
-            {
-              autoAlpha: 0,
-              ease: "none",
-              ...(canMoveVertically ? { y: -driftDistance } : {}),
-              scrollTrigger: {
-                trigger: section,
-                start: exitStart,
-                end: exitEnd,
                 scrub: 1,
                 onToggle: ({ isActive }) => setWillChange(isActive),
               },
